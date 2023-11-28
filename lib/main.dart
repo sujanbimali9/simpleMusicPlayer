@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:music_player/models/playlist_model.dart';
-import 'package:music_player/models/song_model.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:music_player/pages/home.dart';
 import 'package:music_player/pages/playerscreen.dart';
 import 'package:music_player/pages/playlist.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({
+    super.key,
+  });
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       // theme: ThemeData(
       //   colorScheme: ColorScheme.fromSeed(
@@ -25,8 +31,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomePage(),
         '/playlist': (context) {
-          final Playlist playlist =
-              ModalRoute.of(context)!.settings.arguments as Playlist;
+          final List<Object?> arguments =
+              ModalRoute.of(context)!.settings.arguments as List<Object?>;
+          final List<PlaylistModel> playlist =
+              arguments[0] as List<PlaylistModel>;
+
           return PlayLists(
             playlist: playlist,
           );
@@ -34,27 +43,14 @@ class MyApp extends StatelessWidget {
         '/player': (context) {
           final List<Object?> arguments =
               ModalRoute.of(context)!.settings.arguments as List<Object?>;
-          final Song songs = arguments[0] as Song;
-          final Playlist? playlist = arguments[1] as Playlist?;
-          // final int index = arguments[2] as int;
+          final Object? data = arguments[0];
+
           return PlayerScreen(
-            songs: songs,
-            playlist: playlist,
-            // index: index,
+            data: data as List<SongModel?>,
           );
         },
       },
-
       home: const HomePage(),
     );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const HomePage();
   }
 }

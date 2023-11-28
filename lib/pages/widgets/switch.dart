@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:music_player/controller/controller.dart';
+// import 'package:on_audio_query/on_audio_query.dart';
 
 class Switches extends StatefulWidget {
   const Switches({super.key});
@@ -21,6 +24,9 @@ class _SwitchesState extends State<Switches> {
 
   @override
   Widget build(BuildContext context) {
+    // var controller = Get.put(PlayerController());
+    // Future<List<PlaylistModel>>? playlist = OnAudioQuery().queryPlaylists();
+    // int index;
     return Container(
       key: _containerKey,
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -39,6 +45,8 @@ class _SwitchesState extends State<Switches> {
                 onTap: () {
                   setState(() {
                     pressed = 0;
+                    // index = 1;
+                    // Get.to(() => PlayerScreen(playlist: playlist));
                   });
                 },
                 child: Container(
@@ -77,9 +85,21 @@ class _SwitchesState extends State<Switches> {
               ),
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    pressed = 1;
-                  });
+                  setState(
+                    () {
+                      pressed = 1;
+                    },
+                  );
+                  // index = Random().nextInt(data!.length - 1) + 1;
+                  // Get.to(() => PlayerScreen(data: data));
+                  // if (controller.playIndex.value == index &&
+                  //     controller.isPlaying.value) {
+                  // } else {
+                  //   controller.playSong(
+                  //     data[index].uri,
+                  //     index,
+                  //   );
+                  // }
                 },
                 child: Container(
                   width: containerWidth / 2,

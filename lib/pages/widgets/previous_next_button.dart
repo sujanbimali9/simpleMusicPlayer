@@ -15,15 +15,11 @@ class PreviousNextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<SequenceState?>(
-        stream: audioPlayer.sequenceStateStream,
-        builder: (context, snapshot) {
-          return IconButton(
-            onPressed: onpressed,
-            icon: icon,
-            iconSize: 30,
-            color: Colors.white,
-          );
-        });
+    return IconButton(
+      onPressed: onpressed,
+      icon: icon,
+      iconSize: 30,
+      color: Colors.white,
+    );
   }
 }

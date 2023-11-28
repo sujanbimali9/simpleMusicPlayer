@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:music_player/models/playlist_model.dart';
+import 'package:get/get.dart';
+import 'package:music_player/controller/controller.dart';
 import 'package:music_player/pages/widgets/switch.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class PlayLists extends StatelessWidget {
-  final Playlist playlist;
+  final List<PlaylistModel> playlist;
   const PlayLists({super.key, required this.playlist});
 
   @override
@@ -42,7 +44,7 @@ class PlayLists extends StatelessWidget {
         ),
         child: Column(
           children: [
-            SongImage(image: playlist.imageUrl),
+            const SongImage(image: 'https://picsum.photos/200/300'),
             const Padding(
               padding: EdgeInsets.all(15.0),
               child: Text(
@@ -62,42 +64,67 @@ class PlayLists extends StatelessWidget {
   }
 }
 
-class Lists extends StatelessWidget {
-  final Playlist playlist;
+class Lists extends StatefulWidget {
+  final List<PlaylistModel> playlist;
   const Lists({super.key, required this.playlist});
+
+  @override
+  State<Lists> createState() => _ListsState();
+}
+
+class _ListsState extends State<Lists> {
+  loadPlaylist(PlayerController controller) async {
+    final selectedPlaylist = widget.playlist[controller.playIndex.value];
+    final playlistSongs = await controller.audioQuery.queryAudiosFrom(
+      AudiosFromType.PLAYLIST,
+      selectedPlaylist.id,
+      sortType: SongSortType.DURATION,
+      ignoreCase: true,
+    );
+    final List<SongModel> playlist = [];
+    playlist.addAll(playlistSongs);
+    return playlist;
+  }
+
+  late PlayerController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(PlayerController());
+    loadPlaylist(controller);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
-          itemCount: playlist.songs.length,
+          itemCount: widget.playlist.length,
           itemBuilder: (context, index) {
             return ListTile(
               onTap: () {
+                controller.playIndex = index.obs;
+                final List<SongModel> playlist = loadPlaylist(controller);
                 Navigator.pushNamed(
                   context,
                   '/player',
-                  arguments: [
-                    playlist.songs[index],
-                    playlist,
-                  ],
+                  arguments: [playlist],
                 );
               },
-              title: Text(playlist.songs[index].title,
+              title: Text(widget.playlist[index].playlist,
                   style: const TextStyle(fontSize: 17, color: Colors.white)),
               subtitle: Row(
                 children: [
                   Text(
-                    playlist.songs[index].description,
+                    widget.playlist[index].playlist,
                     style: const TextStyle(fontSize: 13, color: Colors.white),
                   ),
                   const Text(
                     ' - ',
                     style: TextStyle(fontSize: 13, color: Colors.white),
                   ),
-                  const Text(
-                    'length',
-                    style: TextStyle(fontSize: 13, color: Colors.white),
+                  Text(
+                    widget.playlist[index].numOfSongs.toString(),
+                    style: const TextStyle(fontSize: 13, color: Colors.white),
                   ),
                 ],
               ),

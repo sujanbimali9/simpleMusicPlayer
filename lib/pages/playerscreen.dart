@@ -1,73 +1,51 @@
+import 'package:get/get.dart';
+import 'package:music_player/controller/controller.dart';
 import 'package:music_player/pages/playerscreen_export.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 
 class PlayerScreen extends StatefulWidget {
-  final Song songs;
-  final Playlist? playlist;
-  final int? index;
+  final List<SongModel?>? data;
 
-  const PlayerScreen({Key? key, required this.songs, this.playlist, this.index})
-      : super(key: key);
+  const PlayerScreen({
+    Key? key,
+    this.data,
+  }) : super(key: key);
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
+  final PlayerController controller = Get.put(PlayerController());
   AudioPlayer audioPlayer = AudioPlayer();
 
+  late int index;
   @override
   void initState() {
+    index = controller.playIndex.value;
     super.initState();
+
+    audioPlayer.setAudioSource(
+      ConcatenatingAudioSource(
+        children: widget.data!
+            .map(
+              (e) => AudioSource.uri(
+                Uri.parse(e!.data),
+                tag: MediaItem(
+                  id: e.id.toString(),
+                  album: e.album,
+                  title: e.title,
+                  artist: e.artist,
+                  duration: Duration(milliseconds: e.duration as int),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+      initialIndex: controller.playIndex.value,
+    );
     audioPlayer.play();
-    widget.playlist == null
-        ? audioPlayer.setAudioSource(
-            ConcatenatingAudioSource(
-              children: [
-                AudioSource.uri(
-                  Uri.parse('asset:///${widget.songs.url}'),
-                  tag: MediaItem(
-                      id: widget.songs.title,
-                      title: widget.songs.title,
-                      artUri: Uri.parse(widget.songs.coverUrl),
-                      displayDescription: widget.songs.description),
-                ),
-                AudioSource.uri(
-                  Uri.parse('asset:///${Song.songs[1].url}'),
-                  tag: MediaItem(
-                      id: Song.songs[1].title,
-                      title: Song.songs[1].title,
-                      artUri: Uri.parse(Song.songs[1].coverUrl),
-                      displayDescription: Song.songs[2].description),
-                ),
-                AudioSource.uri(
-                  Uri.parse('asset:///${Song.songs[2].url}'),
-                  tag: MediaItem(
-                      id: Song.songs[2].title,
-                      title: Song.songs[2].title,
-                      artUri: Uri.parse(Song.songs[2].coverUrl),
-                      displayDescription: Song.songs[1].description),
-                ),
-              ],
-            ),
-          )
-        : audioPlayer.setAudioSource(
-            ConcatenatingAudioSource(
-              children: widget.playlist!.songs
-                  .map(
-                    (song) => AudioSource.uri(
-                      Uri.parse('asset:///${song.url}'),
-                      tag: MediaItem(
-                        id: song.title,
-                        title: song.title,
-                        artUri: Uri.parse(song.coverUrl),
-                        displayDescription: song.description,
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          );
   }
 
   IconButton playPauseButton(
@@ -170,9 +148,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
               if (state?.sequence.isEmpty ?? true) {
                 return const SizedBox();
               }
-              final metadata = state?.currentSource!.tag as MediaItem;
+              // final metadata = state?.currentSource?.tag as MediaItem;
               return Image.asset(
-                metadata.artUri.toString(),
+                'assets/images/glass.jpg',
                 filterQuality: FilterQuality.high,
                 fit: BoxFit.cover,
               );
@@ -186,7 +164,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
             child: Column(
               children: [
                 const Spacer(),
-                SongDetails(audioPlayer: audioPlayer),
+                SongDetails(
+                  audioPlayer: audioPlayer,
+                  // song: widget.data != null
+                  //     ? widget.data![index] as SongModel
+                  //     : widget.playlist![index] as PlaylistModel,
+                ),
                 CustomSlider(
                     positionDataStream: positionDataStream,
                     audioPlayer: audioPlayer),
@@ -204,9 +187,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       audioPlayer: audioPlayer,
                       icon: const Icon(Icons.skip_previous),
                       onpressed: () {
-                        audioPlayer.hasNext
-                            ? audioPlayer.seekToPrevious()
-                            : null;
+                        if (audioPlayer.hasPrevious) {
+                          index = index - 1;
+                          audioPlayer.seekToPrevious();
+                        }
                       },
                     ),
                     StreamBuilder<PlayerState>(
@@ -222,7 +206,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       audioPlayer: audioPlayer,
                       icon: const Icon(Icons.skip_next),
                       onpressed: () {
-                        audioPlayer.hasNext ? audioPlayer.seekToNext() : null;
+                        if (audioPlayer.hasNext) {
+                          index + 1;
+                          audioPlayer.seekToNext();
+                        }
                       },
                     ),
                     IconButton(
