@@ -7,6 +7,10 @@ class PlayerController extends GetxController {
   AudioPlayer audioPlayer = AudioPlayer();
   OnAudioQuery audioQuery = OnAudioQuery();
 
+  RxList<SongModel> songs = <SongModel>[].obs;
+
+  RxList<PlaylistModel> playlist = <PlaylistModel>[].obs;
+
   var playIndex = 0.obs;
   var isPlaying = false.obs;
 
@@ -33,12 +37,9 @@ class PlayerController extends GetxController {
     repeat.value = repeatInput;
   }
 
-  playSong(String? uri, int index) {
-    playIndex.value = index;
+  playSong() {
     try {
-      // audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(uri!)));
       audioPlayer.play();
-      isPlaying.value = true;
     } on Exception {
       throw {'error': 'error'};
     }
@@ -63,11 +64,21 @@ class PlayerController extends GetxController {
     }
   }
 
+  replaySong() {
+    audioPlayer.seek(Duration.zero, index: audioPlayer.effectiveIndices!.first);
+  }
+
   _checkPermission() async {
     var status = await Permission.storage.request();
     if (status.isGranted) {
     } else {
       _checkPermission();
     }
+  }
+
+  List<SongModel> check(List<SongModel> songs) {
+    return songs
+        .where((song) => song.duration != null && song.duration! >= 10)
+        .toList();
   }
 }

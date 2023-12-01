@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:on_audio_query/on_audio_query.dart';
+import 'package:music_player/controller/controller.dart';
+import 'package:music_player/widgets/add_to_plalylist.dart';
 
 class SongDetails extends StatelessWidget {
+  final PlayerController controller;
   const SongDetails({
     super.key,
-    required this.audioPlayer,
-    // required this.song,
+    required this.controller,
   });
-
-  final AudioPlayer audioPlayer;
 
   @override
   Widget build(BuildContext context) {
-    var audioQuery = OnAudioQuery();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0),
       child: Row(
@@ -24,7 +22,7 @@ class SongDetails extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               StreamBuilder<SequenceState?>(
-                stream: audioPlayer.sequenceStateStream,
+                stream: controller.audioPlayer.sequenceStateStream,
                 builder: (context, snapshot) {
                   final state = snapshot.data;
                   if (state?.sequence.isEmpty ?? true) {
@@ -46,7 +44,7 @@ class SongDetails extends StatelessWidget {
                 },
               ),
               StreamBuilder<SequenceState?>(
-                stream: audioPlayer.sequenceStateStream,
+                stream: controller.audioPlayer.sequenceStateStream,
                 builder: (context, snapshot) {
                   final state = snapshot.data;
                   if (state?.sequence.isEmpty ?? true) {
@@ -65,7 +63,7 @@ class SongDetails extends StatelessWidget {
             ],
           ),
           StreamBuilder<SequenceState?>(
-              stream: audioPlayer.sequenceStateStream,
+              stream: controller.audioPlayer.sequenceStateStream,
               builder: (context, snapshot) {
                 final state = snapshot.data;
                 if (state?.sequence.isEmpty ?? true) {
@@ -73,18 +71,10 @@ class SongDetails extends StatelessWidget {
                 }
                 final metadata = state?.currentSource!.tag as MediaItem;
 
-                return IconButton(
-                  onPressed: () {
-                    audioQuery.addToPlaylist(
-                      291,
-                      int.parse(
-                        metadata.id,
-                      ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.bookmark_outline_sharp,
-                    color: Colors.white,
+                return AddToPlaylist(
+                  title: metadata.title,
+                  songId: int.parse(
+                    metadata.id,
                   ),
                 );
               }),

@@ -1,9 +1,10 @@
 export 'package:flutter/material.dart';
+export 'package:get/get.dart';
+export 'package:music_player/controller/controller.dart';
 export 'package:just_audio/just_audio.dart';
 export 'package:just_audio_background/just_audio_background.dart';
-export 'package:music_player/pages/widgets/song_model.dart';
-export 'package:music_player/pages/widgets/background_playscreen.dart';
-export 'package:music_player/pages/widgets/previous_next_button.dart';
-export 'package:music_player/pages/widgets/slider_position.dart';
-export 'package:music_player/pages/widgets/slider.dart';
-export 'package:music_player/pages/widgets/song_detail.dart';
+export 'package:music_player/widgets/background_playscreen.dart';
+export 'package:music_player/widgets/previous_next_button.dart';
+export 'package:music_player/widgets/slider_position.dart';
+export 'package:music_player/widgets/slider.dart';
+export 'package:music_player/widgets/song_detail.dart';

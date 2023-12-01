@@ -1,15 +1,9 @@
-import 'package:get/get.dart';
-import 'package:music_player/controller/controller.dart';
 import 'package:music_player/pages/playerscreen_export.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 
 class PlayerScreen extends StatefulWidget {
-  final List<SongModel?>? data;
-
   const PlayerScreen({
     Key? key,
-    this.data,
   }) : super(key: key);
 
   @override
@@ -18,20 +12,17 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> {
   final PlayerController controller = Get.put(PlayerController());
-  AudioPlayer audioPlayer = AudioPlayer();
 
-  late int index;
   @override
   void initState() {
-    index = controller.playIndex.value;
     super.initState();
 
-    audioPlayer.setAudioSource(
+    controller.audioPlayer.setAudioSource(
       ConcatenatingAudioSource(
-        children: widget.data!
+        children: controller.songs
             .map(
               (e) => AudioSource.uri(
-                Uri.parse(e!.data),
+                Uri.parse(e.data),
                 tag: MediaItem(
                   id: e.id.toString(),
                   album: e.album,
@@ -45,24 +36,26 @@ class _PlayerScreenState extends State<PlayerScreen> {
       ),
       initialIndex: controller.playIndex.value,
     );
-    audioPlayer.play();
+    controller.playSong();
   }
 
   IconButton playPauseButton(
-    AudioPlayer audioPlayer,
+    PlayerController controller,
     ProcessingState? processingState,
     bool? playing,
   ) {
+    AudioPlayer audioPlayer = AudioPlayer();
     if (processingState == ProcessingState.loading ||
         processingState == ProcessingState.buffering) {
       return IconButton(
-        icon: const Icon(
-          Icons.play_circle_fill_rounded,
-          color: Colors.white,
-          size: 60,
-        ),
-        onPressed: audioPlayer.pause,
-      );
+          icon: const Icon(
+            Icons.play_circle_fill_rounded,
+            color: Colors.white,
+            size: 60,
+          ),
+          onPressed: () {
+            controller.audioPlayer.pause();
+          });
     } else if (playing != true) {
       return IconButton(
         icon: const Icon(
@@ -70,7 +63,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
           color: Colors.white,
           size: 60,
         ),
-        onPressed: audioPlayer.play,
+        onPressed: () {
+          controller.audioPlayer.play();
+        },
       );
     } else if (processingState != ProcessingState.completed) {
       return IconButton(
@@ -79,32 +74,29 @@ class _PlayerScreenState extends State<PlayerScreen> {
           color: Colors.white,
           size: 60,
         ),
-        onPressed: audioPlayer.pause,
+        onPressed: () {
+          controller.audioPlayer.pause();
+        },
       );
     } else {
       return IconButton(
-        icon: const Icon(
-          Icons.replay_circle_filled_rounded,
-          color: Colors.white,
-          size: 60,
-        ),
-        onPressed: () => audioPlayer.seek(Duration.zero,
-            index: audioPlayer.effectiveIndices!.first),
-      );
+          icon: const Icon(
+            Icons.replay_circle_filled_rounded,
+            color: Colors.white,
+            size: 60,
+          ),
+          onPressed: () {
+            audioPlayer.seek(Duration.zero,
+                index: audioPlayer.effectiveIndices!.first);
+          });
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    audioPlayer.dispose();
   }
 
   Stream<PositionData> get positionDataStream =>
       rxdart.Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        audioPlayer.positionStream,
-        audioPlayer.bufferedPositionStream,
-        audioPlayer.durationStream,
+        controller.audioPlayer.positionStream,
+        controller.audioPlayer.bufferedPositionStream,
+        controller.audioPlayer.durationStream,
         (position, bufferedPosition, duration) => PositionData(
           position,
           bufferedPosition,
@@ -114,7 +106,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final playlist = widget.playlist;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -142,13 +133,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
         fit: StackFit.expand,
         children: [
           StreamBuilder<SequenceState?>(
-            stream: audioPlayer.sequenceStateStream,
+            stream: controller.audioPlayer.sequenceStateStream,
             builder: (context, snapshot) {
               final state = snapshot.data;
               if (state?.sequence.isEmpty ?? true) {
                 return const SizedBox();
               }
-              // final metadata = state?.currentSource?.tag as MediaItem;
+
               return Image.asset(
                 'assets/images/glass.jpg',
                 filterQuality: FilterQuality.high,
@@ -165,14 +156,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
               children: [
                 const Spacer(),
                 SongDetails(
-                  audioPlayer: audioPlayer,
-                  // song: widget.data != null
-                  //     ? widget.data![index] as SongModel
-                  //     : widget.playlist![index] as PlaylistModel,
+                  controller: controller,
                 ),
                 CustomSlider(
-                    positionDataStream: positionDataStream,
-                    audioPlayer: audioPlayer),
+                  controller: controller,
+                  positionDataStream: positionDataStream,
+                ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -184,32 +173,24 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       color: Colors.white,
                     ),
                     PreviousNextButton(
-                      audioPlayer: audioPlayer,
                       icon: const Icon(Icons.skip_previous),
                       onpressed: () {
-                        if (audioPlayer.hasPrevious) {
-                          index = index - 1;
-                          audioPlayer.seekToPrevious();
-                        }
+                        controller.audioPlayer.seekToPrevious();
                       },
                     ),
                     StreamBuilder<PlayerState>(
-                        stream: audioPlayer.playerStateStream,
+                        stream: controller.audioPlayer.playerStateStream,
                         builder: (context, snapshot) {
                           final playerState = snapshot.data;
                           final processingState = playerState?.processingState;
-                          final playing = playerState?.playing;
-                          return playPauseButton(
-                              audioPlayer, processingState, playing);
+
+                          return playPauseButton(controller, processingState,
+                              playerState?.playing);
                         }),
                     PreviousNextButton(
-                      audioPlayer: audioPlayer,
                       icon: const Icon(Icons.skip_next),
                       onpressed: () {
-                        if (audioPlayer.hasNext) {
-                          index + 1;
-                          audioPlayer.seekToNext();
-                        }
+                        controller.nextSong();
                       },
                     ),
                     IconButton(

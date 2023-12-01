@@ -1,17 +1,18 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:music_player/pages/widgets/slider_position.dart';
+
+import 'package:music_player/controller/controller.dart';
+import 'package:music_player/widgets/slider_position.dart';
 
 class CustomSlider extends StatelessWidget {
   const CustomSlider({
     super.key,
     required this.positionDataStream,
-    required this.audioPlayer,
+    required this.controller,
   });
 
   final Stream<PositionData> positionDataStream;
-  final AudioPlayer audioPlayer;
+  final PlayerController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class CustomSlider extends StatelessWidget {
             total: positionData?.duration ?? Duration.zero,
             progress: positionData?.position ?? Duration.zero,
             buffered: positionData?.bufferedPosition ?? Duration.zero,
-            onSeek: audioPlayer.seek,
+            onSeek: controller.audioPlayer.seek,
           );
         });
   }

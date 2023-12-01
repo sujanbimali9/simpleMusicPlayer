@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:music_player/controller/controller.dart';
-// import 'package:on_audio_query/on_audio_query.dart';
+import 'package:get/get.dart';
+import 'package:music_player/controller/controller.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class Switches extends StatefulWidget {
-  const Switches({super.key});
+  const Switches({super.key, required this.controller});
+  final PlayerController controller;
 
   @override
   State<Switches> createState() => _SwitchesState();
@@ -12,8 +13,11 @@ class Switches extends StatefulWidget {
 
 class _SwitchesState extends State<Switches> {
   late int pressed;
+
   final GlobalKey _containerKey = GlobalKey();
+
   double containerWidth = 0.0;
+
   @override
   void initState() {
     setState(() {
@@ -24,9 +28,24 @@ class _SwitchesState extends State<Switches> {
 
   @override
   Widget build(BuildContext context) {
-    // var controller = Get.put(PlayerController());
-    // Future<List<PlaylistModel>>? playlist = OnAudioQuery().queryPlaylists();
-    // int index;
+    songData(List<PlaylistModel> playlist) async {
+      final songs = await widget.controller.audioQuery
+          .queryAudiosFrom(AudiosFromType.PLAYLIST, playlist[0].id);
+      widget.controller.songs = songs.obs;
+      widget.controller.playIndex = 0.obs;
+    }
+
+    playlistData(bool shuffle) async {
+      final playlist = await widget.controller.audioQuery.queryPlaylists();
+      final shuffledPlaylist = playlist.toList()..shuffle();
+      widget.controller.playlist = shuffledPlaylist.obs;
+      if (playlist.isNotEmpty) {
+        if (!shuffle) {
+          songData(playlist);
+        }
+      }
+    }
+
     return Container(
       key: _containerKey,
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -43,11 +62,8 @@ class _SwitchesState extends State<Switches> {
             children: [
               GestureDetector(
                 onTap: () {
-                  setState(() {
-                    pressed = 0;
-                    // index = 1;
-                    // Get.to(() => PlayerScreen(playlist: playlist));
-                  });
+                  playlistData(false);
+                  Navigator.pushNamed(context, '/player');
                 },
                 child: Container(
                   width: containerWidth / 2,
@@ -85,21 +101,7 @@ class _SwitchesState extends State<Switches> {
               ),
               GestureDetector(
                 onTap: () {
-                  setState(
-                    () {
-                      pressed = 1;
-                    },
-                  );
-                  // index = Random().nextInt(data!.length - 1) + 1;
-                  // Get.to(() => PlayerScreen(data: data));
-                  // if (controller.playIndex.value == index &&
-                  //     controller.isPlaying.value) {
-                  // } else {
-                  //   controller.playSong(
-                  //     data[index].uri,
-                  //     index,
-                  //   );
-                  // }
+                  playlistData(true);
                 },
                 child: Container(
                   width: containerWidth / 2,

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/controller/controller.dart';
-import 'package:music_player/pages/widgets/switch.dart';
+import 'package:music_player/widgets/switch.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class PlayLists extends StatelessWidget {
-  final List<PlaylistModel> playlist;
-  const PlayLists({super.key, required this.playlist});
+  final PlayerController controller;
+  const PlayLists({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple.shade800,
-        // actions: [PopUp()],
         title: const Text(
           'Playlist',
           style: TextStyle(
@@ -55,8 +57,12 @@ class PlayLists extends StatelessWidget {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            const Switches(),
-            Lists(playlist: playlist),
+            Switches(
+              controller: controller,
+            ),
+            Lists(
+              controller: controller,
+            ),
           ],
         ),
       ),
@@ -64,58 +70,45 @@ class PlayLists extends StatelessWidget {
   }
 }
 
-class Lists extends StatefulWidget {
-  final List<PlaylistModel> playlist;
-  const Lists({super.key, required this.playlist});
+class Lists extends StatelessWidget {
+  final PlayerController controller;
+  const Lists({super.key, required this.controller});
 
-  @override
-  State<Lists> createState() => _ListsState();
-}
-
-class _ListsState extends State<Lists> {
   loadPlaylist(PlayerController controller) async {
-    final selectedPlaylist = widget.playlist[controller.playIndex.value];
+    final selectedPlaylist = controller.playlist[controller.playIndex.value];
     final playlistSongs = await controller.audioQuery.queryAudiosFrom(
       AudiosFromType.PLAYLIST,
       selectedPlaylist.id,
       sortType: SongSortType.DURATION,
       ignoreCase: true,
     );
-    final List<SongModel> playlist = [];
-    playlist.addAll(playlistSongs);
-    return playlist;
-  }
 
-  late PlayerController controller;
-  @override
-  void initState() {
-    super.initState();
-    controller = Get.put(PlayerController());
-    loadPlaylist(controller);
+    controller.playIndex = 0.obs;
+    controller.songs.replaceRange(0, controller.songs.length, playlistSongs);
+    controller.songs = controller.check(controller.songs).obs;
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
-          itemCount: widget.playlist.length,
+          itemCount: controller.playlist.length,
           itemBuilder: (context, index) {
             return ListTile(
               onTap: () {
                 controller.playIndex = index.obs;
-                final List<SongModel> playlist = loadPlaylist(controller);
+                loadPlaylist(controller);
                 Navigator.pushNamed(
                   context,
                   '/player',
-                  arguments: [playlist],
                 );
               },
-              title: Text(widget.playlist[index].playlist,
+              title: Text(controller.playlist[index].playlist,
                   style: const TextStyle(fontSize: 17, color: Colors.white)),
               subtitle: Row(
                 children: [
                   Text(
-                    widget.playlist[index].playlist,
+                    controller.playlist[index].playlist,
                     style: const TextStyle(fontSize: 13, color: Colors.white),
                   ),
                   const Text(
@@ -123,7 +116,7 @@ class _ListsState extends State<Lists> {
                     style: TextStyle(fontSize: 13, color: Colors.white),
                   ),
                   Text(
-                    widget.playlist[index].numOfSongs.toString(),
+                    controller.playlist[index].numOfSongs.toString(),
                     style: const TextStyle(fontSize: 13, color: Colors.white),
                   ),
                 ],

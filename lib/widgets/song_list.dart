@@ -1,14 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/controller/controller.dart';
-import 'package:music_player/pages/playerscreen_export.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class SongList extends StatelessWidget {
-  const SongList({super.key});
+  final PlayerController controller;
+  const SongList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    final PlayerController controller = Get.put(PlayerController());
     return FutureBuilder(
       future: controller.audioQuery.queryPlaylists(
         ignoreCase: true,
@@ -30,8 +30,12 @@ class SongList extends StatelessWidget {
                 child: ListTile(
                   onTap: () {
                     controller.playIndex = index.obs;
-                    Navigator.pushNamed(context, '/playlist',
-                        arguments: [playlist]);
+                    controller.playlist
+                        .replaceRange(0, controller.playlist.length, playlist!);
+                    Navigator.pushNamed(
+                      context,
+                      '/playlist',
+                    );
                   },
                   leading: Container(
                     height: 50,
