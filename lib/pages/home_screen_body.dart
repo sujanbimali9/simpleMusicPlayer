@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:music_player/controller/controller.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
+import 'package:music_player/pages/playerscreen_export.dart';
 import 'package:music_player/widgets/custom_card.dart';
 import 'package:music_player/widgets/song_list.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class HomeScreenBody extends StatelessWidget {
   final PlayerController controller;
@@ -39,7 +41,7 @@ class HomeScreenBody extends StatelessWidget {
             style: TextStyle(
                 color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const _SearchBar(),
+          SearchBar(controller: controller),
           const SectionHeader(
             title: 'Trending Music',
             action: 'View More',
@@ -84,11 +86,20 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+class SearchBar extends StatefulWidget {
+  final PlayerController controller;
+  const SearchBar({super.key, required this.controller});
 
   @override
+  State<SearchBar> createState() => SearchBarState();
+}
+
+class SearchBarState extends State<SearchBar> {
+  @override
   Widget build(BuildContext context) {
+    List<SongModel> songs = [];
+    List<String> filteredSongs = [];
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.06,
       margin: const EdgeInsets.only(
@@ -96,6 +107,28 @@ class _SearchBar extends StatelessWidget {
         bottom: 5,
       ),
       child: TextField(
+        onTap: () async {
+          songs = await widget.controller.audioQuery.querySongs();
+
+          filteredSongs = songs
+              .where((song) => song.duration != null && song.duration! >= 10)
+              .map((filteredSong) => filteredSong.title)
+              .toList();
+        },
+        onChanged: (value) {
+          widget.controller.searchResult = extractTop(
+                  query: value,
+                  choices: filteredSongs,
+                  limit: filteredSongs.length)
+              .where((element) => element.score >= 60)
+              .map((e) => e.choice)
+              .toList()
+              .obs;
+          print('sujan bimali${widget.controller.searchResult}');
+        },
+        onSubmitted: (value) {
+          Navigator.pushNamed(context, '/search');
+        },
         decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
             hintText: 'Search',

@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class PlayerController extends GetxController {
   AudioPlayer audioPlayer = AudioPlayer();
@@ -10,6 +9,10 @@ class PlayerController extends GetxController {
   RxList<SongModel> songs = <SongModel>[].obs;
 
   RxList<PlaylistModel> playlist = <PlaylistModel>[].obs;
+
+  RxList<SongModel> searchSongs = <SongModel>[].obs;
+  RxList searchResult = [].obs;
+  var searchValue = 'search'.obs;
 
   var playIndex = 0.obs;
   var isPlaying = false.obs;
@@ -22,12 +25,6 @@ class PlayerController extends GetxController {
 
   var random = false.obs;
   var repeat = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit;
-    _checkPermission();
-  }
 
   setRandom(bool randomInput) {
     random.value = randomInput;
@@ -66,14 +63,6 @@ class PlayerController extends GetxController {
 
   replaySong() {
     audioPlayer.seek(Duration.zero, index: audioPlayer.effectiveIndices!.first);
-  }
-
-  _checkPermission() async {
-    var status = await Permission.storage.request();
-    if (status.isGranted) {
-    } else {
-      _checkPermission();
-    }
   }
 
   List<SongModel> check(List<SongModel> songs) {
