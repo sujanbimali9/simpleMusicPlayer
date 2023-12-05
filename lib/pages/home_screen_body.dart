@@ -97,9 +97,6 @@ class SearchBar extends StatefulWidget {
 class SearchBarState extends State<SearchBar> {
   @override
   Widget build(BuildContext context) {
-    List<SongModel> songs = [];
-    List<String> filteredSongs = [];
-
     return Container(
       height: MediaQuery.of(context).size.height * 0.06,
       margin: const EdgeInsets.only(
@@ -107,26 +104,7 @@ class SearchBarState extends State<SearchBar> {
         bottom: 5,
       ),
       child: TextField(
-        onTap: () async {
-          songs = await widget.controller.audioQuery.querySongs();
-
-          filteredSongs = songs
-              .where((song) => song.duration != null && song.duration! >= 10)
-              .map((filteredSong) => filteredSong.title)
-              .toList();
-        },
-        onChanged: (value) {
-          widget.controller.searchResult = extractTop(
-                  query: value,
-                  choices: filteredSongs,
-                  limit: filteredSongs.length)
-              .where((element) => element.score >= 60)
-              .map((e) => e.choice)
-              .toList()
-              .obs;
-          print('sujan bimali${widget.controller.searchResult}');
-        },
-        onSubmitted: (value) {
+        onTap: () {
           Navigator.pushNamed(context, '/search');
         },
         decoration: InputDecoration(

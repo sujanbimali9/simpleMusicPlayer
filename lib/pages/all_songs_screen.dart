@@ -143,92 +143,78 @@ class SongsByPlaylist extends StatelessWidget {
   final PlayerController controller;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.deepPurple.shade800,
-            Colors.deepPurple.shade200,
-          ],
-        ),
-      ),
-      child: FutureBuilder(
-          future: controller.audioQuery.queryPlaylists(),
-          builder: (context, snapshot) {
-            if (snapshot.data == null) {
-              return const Center(
-                child: CircularProgressIndicator.adaptive(),
-              );
-            } else {
-              final data = snapshot.data;
-              return ListView.builder(
-                itemCount: snapshot.data?.length,
-                itemBuilder: (context, index) {
-                  return ExpansionTile(
-                    collapsedIconColor: Colors.white38,
-                    title: ListTile(
-                      title: Text(data![index].playlist),
-                      subtitle:
-                          Text("Songs : ${data[index].numOfSongs.toString()}"),
-                      leading: const CircleAvatar(
-                        backgroundImage:
-                            NetworkImage('https://picsum.photos/200/300'),
-                      ),
-                      onTap: () {
-                        controller.playIndex = index.obs;
-                      },
-                    ),
-                    children: [
-                      FutureBuilder(
-                          future: controller.audioQuery.queryAudiosFrom(
-                              AudiosFromType.PLAYLIST, data[index].id),
-                          builder: (context, snapshot) {
-                            if (snapshot.data == null) {
-                              return const Center(
-                                child: CircularProgressIndicator.adaptive(),
-                              );
-                            } else {
-                              final data = snapshot.data;
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: snapshot.data?.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    title: Text(data![index].title),
-                                    subtitle:
-                                        Text(data[index].artist ?? 'Unknown'),
-                                    leading: const CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                          'https://picsum.photos/200/300'),
-                                    ),
-                                    // trailing: AddToPlaylist(
-                                    //   title: data[index].title,
-                                    //   songId: data[index].id,
-                                    // ),
-                                    onTap: () {
-                                      controller.playIndex = index.obs;
-                                      controller.songs =
-                                          controller.check(data).obs;
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/player',
-                                      );
-                                    },
+    return FutureBuilder(
+      future: controller.audioQuery.queryPlaylists(),
+      builder: (context, snapshot) {
+        if (snapshot.data == null) {
+          return const Center(
+            child: CircularProgressIndicator.adaptive(),
+          );
+        } else {
+          final data = snapshot.data;
+          return ListView.builder(
+            itemCount: snapshot.data?.length,
+            itemBuilder: (context, index) {
+              return ExpansionTile(
+                collapsedIconColor: Colors.white38,
+                title: ListTile(
+                  title: Text(data![index].playlist),
+                  subtitle:
+                      Text("Songs : ${data[index].numOfSongs.toString()}"),
+                  leading: const CircleAvatar(
+                    backgroundImage:
+                        NetworkImage('https://picsum.photos/200/300'),
+                  ),
+                  onTap: () {
+                    controller.playIndex = index.obs;
+                  },
+                ),
+                children: [
+                  FutureBuilder(
+                      future: controller.audioQuery.queryAudiosFrom(
+                          AudiosFromType.PLAYLIST, data[index].id),
+                      builder: (context, snapshot) {
+                        if (snapshot.data == null) {
+                          return const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          );
+                        } else {
+                          final data = snapshot.data;
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: snapshot.data?.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(data![index].title),
+                                subtitle: Text(data[index].artist ?? 'Unknown'),
+                                leading: const CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                      'https://picsum.photos/200/300'),
+                                ),
+                                // trailing: AddToPlaylist(
+                                //   title: data[index].title,
+                                //   songId: data[index].id,
+                                // ),
+                                onTap: () {
+                                  controller.playIndex = index.obs;
+                                  controller.songs = controller.check(data).obs;
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/player',
                                   );
                                 },
                               );
-                            }
-                          }),
-                    ],
-                  );
-                },
+                            },
+                          );
+                        }
+                      }),
+                ],
               );
-            }
-          }),
+            },
+          );
+        }
+      },
     );
   }
 }

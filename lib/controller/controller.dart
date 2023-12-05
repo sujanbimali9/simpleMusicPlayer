@@ -10,7 +10,7 @@ class PlayerController extends GetxController {
 
   RxList<PlaylistModel> playlist = <PlaylistModel>[].obs;
 
-  RxList<SongModel> searchSongs = <SongModel>[].obs;
+  RxList searchSongs = [].obs;
   RxList searchResult = [].obs;
   var searchValue = 'search'.obs;
 
