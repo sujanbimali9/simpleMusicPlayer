@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:music_player/controller/controller.dart';
 import 'package:music_player/pages/all_songs_screen.dart';
 import 'package:music_player/pages/home_screen_body.dart';
@@ -12,8 +13,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int bottomIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     List<Widget> pages = [
@@ -34,46 +33,48 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
         ),
       ),
-      body: IndexedStack(
-        index: bottomIndex,
-        children: pages,
+      body: Obx(
+        () => IndexedStack(
+          index: widget.controller.bottomIndex.value,
+          children: pages,
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        enableFeedback: false,
-        onTap: (index) {
-          setState(() {
-            bottomIndex = index;
-          });
-        },
-        selectedItemColor: Colors.white,
-        currentIndex: bottomIndex,
-        unselectedItemColor: Colors.white.withOpacity(0.5),
-        backgroundColor: Colors.deepPurple.shade800,
-        showUnselectedLabels: false,
-        showSelectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        iconSize: 20,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: Obx(
+        () => BottomNavigationBar(
+          enableFeedback: false,
+          onTap: (index) {
+            widget.controller.bottomIndex.value = index;
+          },
+          selectedItemColor: Colors.white,
+          currentIndex: widget.controller.bottomIndex.value,
+          unselectedItemColor: Colors.white.withOpacity(0.5),
+          backgroundColor: Colors.deepPurple.shade800,
+          showUnselectedLabels: false,
+          showSelectedLabels: false,
+          type: BottomNavigationBarType.fixed,
+          iconSize: 20,
+          items: const [
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.home_outlined,
+                ),
+                label: 'home'),
+            BottomNavigationBarItem(
               icon: Icon(
-                Icons.home_outlined,
+                Icons.bookmark_border_rounded,
               ),
-              label: 'home'),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.bookmark_border_rounded,
+              label: 'Favourite',
             ),
-            label: 'Favourite',
-          ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.play_circle_outline_rounded),
-          //   label: 'Play',
-          // ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.people_outline),
-          //   label: 'Profile',
-          // ),
-        ],
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.play_circle_outline_rounded),
+            //   label: 'Play',
+            // ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.people_outline),
+            //   label: 'Profile',
+            // ),
+          ],
+        ),
       ),
     );
   }

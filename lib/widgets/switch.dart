@@ -20,9 +20,7 @@ class _SwitchesState extends State<Switches> {
 
   @override
   void initState() {
-    setState(() {
-      pressed = 0;
-    });
+    pressed = 0;
     super.initState();
   }
 
@@ -32,13 +30,13 @@ class _SwitchesState extends State<Switches> {
       final songs = await widget.controller.audioQuery
           .queryAudiosFrom(AudiosFromType.PLAYLIST, playlist[0].id);
       widget.controller.songs = songs.obs;
-      widget.controller.playIndex = 0.obs;
+      widget.controller.playIndex.value = 0;
     }
 
     playlistData(bool shuffle) async {
       final playlist = await widget.controller.audioQuery.queryPlaylists();
       final shuffledPlaylist = playlist.toList()..shuffle();
-      widget.controller.playlist = shuffledPlaylist.obs;
+      widget.controller.playlist.value = shuffledPlaylist;
       if (playlist.isNotEmpty) {
         if (!shuffle) {
           songData(playlist);

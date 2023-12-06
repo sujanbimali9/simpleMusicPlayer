@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:music_player/controller/controller.dart';
 import 'package:music_player/pages/home.dart';
 import 'package:music_player/pages/playerscreen.dart';
@@ -8,7 +9,12 @@ import 'package:music_player/pages/playlist.dart';
 import 'package:music_player/pages/search.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void main() {
+Future<void> main() async {
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   runApp(const MyApp());
 }
 
@@ -90,107 +96,3 @@ Future<bool> checkPermission() async {
   var status = await Permission.storage.request();
   return status.isGranted;
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:fuzzywuzzy/fuzzywuzzy.dart';
-
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: Text('Fuzzy Search List View'),
-//         ),
-//         body: SearchableListView(),
-//       ),
-//     );
-//   }
-// }
-
-// class SearchableListView extends StatefulWidget {
-//   @override
-//   _SearchableListViewState createState() => _SearchableListViewState();
-// }
-
-// class _SearchableListViewState extends State<SearchableListView> {
-//   // Sample list of items
-//   List<String> allItems = [
-//     'Apple',
-//     'Banana',
-//     'Cherry',
-//     'Date',
-//     'Grapes',
-//     'Kiwi',
-//     'Orange',
-//     'Peach',
-//     'Pear',
-//     'Plum',
-//   ];
-
-//   // Filtered items based on user input
-//   List filteredItems = [];
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         Container(
-//           height: MediaQuery.of(context).size.height * 0.06,
-//           margin: const EdgeInsets.only(top: 10.0, bottom: 5),
-//           child: TextField(
-//             onTap: () {
-//               // Show the list when the TextField is tapped
-//               setState(() {
-//                 filteredItems = [];
-//               });
-//             },
-//             onChanged: (value) {
-//               // Update the filtered items based on fuzzy matching
-//               setState(() {
-//                 filteredItems = extractTop(
-//                   query: value,
-//                   choices: allItems,
-//                   limit: 5,
-//                 );
-//               });
-//             },
-//             decoration: InputDecoration(
-//               contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
-//               hintText: 'Search',
-//               hintStyle: TextStyle(
-//                 color: Colors.black.withOpacity(0.5),
-//               ),
-//               prefixIcon: Icon(
-//                 Icons.search,
-//                 color: Colors.black.withOpacity(0.5),
-//               ),
-//               border: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(15),
-//                 borderSide: BorderSide.none,
-//               ),
-//               filled: true,
-//               isDense: true,
-//             ),
-//           ),
-//         ),
-//         if (filteredItems.isNotEmpty)
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: filteredItems.length,
-//               itemBuilder: (context, index) {
-//                 return ListTile(
-//                   title: Text(filteredItems[index].toString()),
-//                   subtitle: Text('Score: ${filteredItems[index].score}'),
-//                 );
-//               },
-//             ),
-//           ),
-//       ],
-//     );
-//   }
-// }

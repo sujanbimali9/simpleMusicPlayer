@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class PlayerController extends GetxController {
   AudioPlayer audioPlayer = AudioPlayer();
   OnAudioQuery audioQuery = OnAudioQuery();
+  final justAudioBackground = JustAudioBackground();
 
   RxList<SongModel> songs = <SongModel>[].obs;
 
@@ -13,6 +15,9 @@ class PlayerController extends GetxController {
   RxList searchSongs = [].obs;
   RxList searchResult = [].obs;
   var searchValue = 'search'.obs;
+
+  var filterIndex = 0.obs;
+  var bottomIndex = 0.obs;
 
   var playIndex = 0.obs;
   var isPlaying = false.obs;

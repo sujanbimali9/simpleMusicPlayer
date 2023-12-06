@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:music_player/pages/playerscreen_export.dart';
 import 'package:music_player/widgets/custom_card.dart';
 import 'package:music_player/widgets/song_list.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 
 class HomeScreenBody extends StatelessWidget {
   final PlayerController controller;
@@ -42,14 +39,18 @@ class HomeScreenBody extends StatelessWidget {
                 color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           SearchBar(controller: controller),
-          const SectionHeader(
+          SectionHeader(
             title: 'Trending Music',
             action: 'View More',
+            allSongs: true,
+            controller: controller,
           ),
           CustomCard(controller: controller),
-          const SectionHeader(
+          SectionHeader(
             title: 'Playlist',
             action: 'View More',
+            allSongs: false,
+            controller: controller,
           ),
           SongList(controller: controller),
         ],
@@ -58,24 +59,45 @@ class HomeScreenBody extends StatelessWidget {
   }
 }
 
-class SectionHeader extends StatelessWidget {
+class SectionHeader extends StatefulWidget {
+  final PlayerController controller;
   final String title;
   final String action;
-  const SectionHeader({super.key, required this.title, required this.action});
+  final bool allSongs;
+  const SectionHeader({
+    super.key,
+    required this.controller,
+    required this.title,
+    required this.action,
+    required this.allSongs,
+  });
 
+  @override
+  State<SectionHeader> createState() => _SectionHeaderState();
+}
+
+class _SectionHeaderState extends State<SectionHeader> {
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title,
+        Text(widget.title,
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold)),
         TextButton(
-          onPressed: () {},
-          child: Text(action,
+          onPressed: () {
+            if (widget.allSongs) {
+              widget.controller.bottomIndex.value = 1;
+              widget.controller.filterIndex.value = 0;
+            } else {
+              widget.controller.bottomIndex.value = 1;
+              widget.controller.filterIndex.value = 1;
+            }
+          },
+          child: Text(widget.action,
               style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
                   fontSize: 14,

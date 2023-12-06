@@ -12,8 +12,6 @@ class Songs extends StatefulWidget {
 }
 
 class _SongsState extends State<Songs> {
-  int filterIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     List<Widget> filter = [
@@ -36,51 +34,58 @@ class _SongsState extends State<Songs> {
         children: [
           Row(
             children: [
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    filterIndex = 0;
-                  });
-                },
-                child: Text(
-                  'All Songs',
-                  style: TextStyle(
-                    color: filterIndex == 0 ? Colors.white : Colors.white60,
+              Obx(
+                () => TextButton(
+                  onPressed: () {
+                    widget.controller.filterIndex.value = 0;
+                  },
+                  child: Text(
+                    'All Songs',
+                    style: TextStyle(
+                      color: widget.controller.filterIndex.value == 0
+                          ? Colors.white
+                          : Colors.white60,
+                    ),
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    filterIndex = 1;
-                  });
-                },
-                child: Text(
-                  'Playlist',
-                  style: TextStyle(
-                    color: filterIndex == 1 ? Colors.white : Colors.white60,
+              Obx(
+                () => TextButton(
+                    onPressed: () {
+                      widget.controller.filterIndex.value = 1;
+                    },
+                    child: Text(
+                      'Playlist',
+                      style: TextStyle(
+                        color: widget.controller.filterIndex.value == 1
+                            ? Colors.white
+                            : Colors.white60,
+                      ),
+                    )),
+              ),
+              Obx(
+                () => TextButton(
+                  onPressed: () {
+                    widget.controller.filterIndex.value = 2;
+                  },
+                  child: Text(
+                    'Album',
+                    style: TextStyle(
+                      color: widget.controller.filterIndex.value == 2
+                          ? Colors.white
+                          : Colors.white60,
+                    ),
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    filterIndex = 2;
-                  });
-                },
-                child: Text(
-                  'Album',
-                  style: TextStyle(
-                    color: filterIndex == 2 ? Colors.white : Colors.white60,
-                  ),
-                ),
-              ),
+              )
             ],
           ),
           Expanded(
-            child: IndexedStack(
-              index: filterIndex,
-              children: filter,
+            child: Obx(
+              () => IndexedStack(
+                index: widget.controller.filterIndex.value,
+                children: filter,
+              ),
             ),
           ),
         ],

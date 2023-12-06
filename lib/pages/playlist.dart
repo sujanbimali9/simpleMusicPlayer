@@ -91,47 +91,49 @@ class Lists extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ListView.builder(
-          itemCount: controller.playlist.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              onTap: () {
-                controller.playIndex = index.obs;
-                loadPlaylist(controller);
-                Navigator.pushNamed(
-                  context,
-                  '/player',
-                );
-              },
-              title: Text(controller.playlist[index].playlist,
-                  style: const TextStyle(fontSize: 17, color: Colors.white)),
-              subtitle: Row(
-                children: [
-                  Text(
-                    controller.playlist[index].playlist,
-                    style: const TextStyle(fontSize: 13, color: Colors.white),
-                  ),
-                  const Text(
-                    ' - ',
-                    style: TextStyle(fontSize: 13, color: Colors.white),
-                  ),
-                  Text(
-                    controller.playlist[index].numOfSongs.toString(),
-                    style: const TextStyle(fontSize: 13, color: Colors.white),
-                  ),
-                ],
-              ),
-              leading: Text(
-                (index + 1).toString(),
-                style: const TextStyle(fontSize: 13, color: Colors.white),
-              ),
-              trailing: const Icon(
-                Icons.more_vert,
-                color: Colors.white,
-              ),
-            );
-          }),
-    );
+        child: Obx(
+      () => ListView.builder(
+        itemCount: controller.playlist.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            onTap: () {
+              controller.playIndex = index.obs;
+              loadPlaylist(controller);
+              Navigator.pushNamed(
+                context,
+                '/player',
+              );
+            },
+            title: Text(controller.playlist[index].playlist,
+                style: const TextStyle(fontSize: 17, color: Colors.white)),
+            subtitle: Row(
+              children: [
+                Text(
+                  controller.playlist[index].playlist,
+                  style: const TextStyle(fontSize: 13, color: Colors.white),
+                ),
+                const Text(
+                  ' - ',
+                  style: TextStyle(fontSize: 13, color: Colors.white),
+                ),
+                Text(
+                  controller.playlist[index].numOfSongs.toString(),
+                  style: const TextStyle(fontSize: 13, color: Colors.white),
+                ),
+              ],
+            ),
+            leading: Text(
+              (index + 1).toString(),
+              style: const TextStyle(fontSize: 13, color: Colors.white),
+            ),
+            trailing: const Icon(
+              Icons.more_vert,
+              color: Colors.white,
+            ),
+          );
+        },
+      ),
+    ));
   }
 }
 
